@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barnes Muscle Tees — Stock</title>
+<style>
+  :root{
+    --bg:#0f0f11; --card:#1a1a1d; --ink:#f3f3f2; --muted:#8e8e93; --line:#2a2a2e;
+    --green:#34d399; --green-bg:rgba(52,211,153,.12); --green-line:rgba(52,211,153,.55);
+    --yellow:#fbbf24; --yellow-bg:rgba(251,191,36,.12); --yellow-line:rgba(251,191,36,.55);
+    --red:#f87171; --red-bg:rgba(248,113,113,.11); --red-line:rgba(248,113,113,.5);
+    --accent:#6ea8fe;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:28px 18px 60px}
+  header{margin-bottom:16px}
+  h1{font-size:22px;font-weight:650;letter-spacing:-.01em;margin:0 0 4px}
+  .sub{font-size:13px;color:var(--muted)}
+  .sub b{color:var(--ink);font-weight:600}
+  .sub .stale{color:var(--yellow)}
+  .controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin:14px 0 8px}
+  .ctl{display:flex;align-items:center;gap:9px;font-size:13.5px}
+  .switch{position:relative;width:42px;height:24px;flex:0 0 auto}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:#3a3a3e;border-radius:999px;transition:.15s;cursor:pointer}
+  .slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s}
+  .switch input:checked + .slider{background:var(--green)}
+  .switch input:checked + .slider:before{transform:translateX(18px)}
+  .switch input:disabled + .slider{opacity:.4;cursor:default}
+  .btn{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:#26262a;color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;padding:8px 13px;font-size:13px;font-weight:560;cursor:pointer;transition:.12s}
+  .btn:hover:not(:disabled){background:#303035;border-color:#3a3a40}
+  .btn:disabled{opacity:.55;cursor:default}
+  .btn svg{width:14px;height:14px}
+  .btn.spin svg{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ctlnote{font-size:12px;color:var(--muted);margin:2px 0 18px;min-height:15px}
+  .ctlnote .pending{color:var(--accent)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 18px;font-size:12.5px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .dot.green{background:var(--green)} .dot.yellow{background:var(--yellow)} .dot.red{background:var(--red)}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+    border-left-width:4px;border-radius:12px;padding:13px 15px;text-decoration:none;color:inherit;
+    transition:transform .08s ease,box-shadow .08s ease,background .15s ease}
+  .row:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
+  .row.green{border-left-color:var(--green-line);background:var(--green-bg)}
+  .row.yellow{border-left-color:var(--yellow-line);background:var(--yellow-bg)}
+  .row.red{border-left-color:var(--red-line);background:var(--red-bg)}
+  .name{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+  .swatch{width:17px;height:17px;border-radius:5px;flex:0 0 auto;border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+  .name .t{font-size:15px;font-weight:600;letter-spacing:-.01em}
+  .bell{color:var(--muted);display:inline-flex;flex:0 0 auto}
+  .err{color:var(--red);font-size:11px;margin-left:6px}
+  .sizes{display:flex;gap:9px}
+  .size{min-width:62px;text-align:center;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;padding:6px 8px}
+  .size .lab{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .size .num{font-size:19px;font-weight:680;line-height:1.1;margin-top:1px;color:var(--ink)}
+  .size.zero .num{color:#565659}
+  .row.green .size.t1 .num{color:var(--green)}
+  .row.yellow .size.t2 .num{color:var(--yellow)}
+  footer{margin-top:24px;font-size:12px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Barnes Muscle Tees — Stock</h1>
+    <div class="sub">Last updated: <b id="updated">—</b> · checks hourly <span id="note2"></span></div>
+  </header>
+
+  <div class="controls">
+    <label class="ctl">
+      <span class="switch"><input type="checkbox" id="alerts" disabled><span class="slider"></span></span>
+      <span>Email alerts</span>
+    </label>
+    <button class="btn" id="refresh">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      Refresh now
+    </button>
+  </div>
+  <div class="ctlnote" id="ctlnote"></div>
+
+  <div class="legend">
+    <span><i class="dot green"></i> Size 1 available</span>
+    <span><i class="dot yellow"></i> Only size 2</span>
+    <span><i class="dot red"></i> Neither size</span>
+    <span><i class="bell"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></i> Alerts on</span>
+  </div>
+
+  <div class="list" id="list"></div>
+  <footer id="note"></footer>
+</div>
+
+<script>
+  const STORE = "https://barnesindustries.com.ar/productos/";
+  const WATCHED = new Set([
+    "muscle-tee-white-t503w","muscle-tees","muscle-tee-slub-black-hhm2a",
+    "muscle-tee-slub-habano-1g2b5","muscle-tee-vison-domingo-20hs-yu8xy",
+  ]);
+  const BELL = '<span class="bell" title="You\'ll be emailed when this returns in size 1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>';
+
+  // Shown before the server answers; replaced by live data.
+  const FALLBACK = {
+    updatedAt: null,
+    items: [
+      { label:"White", swatch:"#ededed", slug:"muscle-tee-white-t503w", t1:0, t2:0 },
+      { label:"Black", swatch:"#161616", slug:"muscle-tees", t1:0, t2:1 },
+      { label:"Slub Black", swatch:"#161616", slug:"muscle-tee-slub-black-hhm2a", t1:0, t2:0 },
+      { label:"Slub Habano", swatch:"#b08457", slug:"muscle-tee-slub-habano-1g2b5", t1:0, t2:0 },
+      { label:"Brown", swatch:"#5c3d2e", slug:"muscle-tee-vison-domingo-20hs-yu8xy", t1:0, t2:0 },
+      { label:"Navy Blue", swatch:"#1b2a4a", slug:"muscle-tee-navy-blue-domingo-20hs-t323a", t1:9, t2:0 },
+      { label:"Bordeaux", swatch:"#7b2233", slug:"muscle-tee-heavyweight-bordeaux-miercoles-20hs-17o91", t1:5, t2:4 },
+      { label:"Military Green", swatch:"#545e2e", slug:"muscle-tee-military-green-domingo-20hs-1thmk", t1:2, t2:1 },
+      { label:"Silver Grey", swatch:"#b7bbc0", slug:"muscle-tee-ash-grey-domingo-20hs-18jel", t1:6, t2:1 },
+    ],
+  };
+
+  let state = { ...FALLBACK, live:false };
+  let alertsEnabled = true;
+
+  const $ = (id)=>document.getElementById(id);
+  const statusOf = (t1,t2)=> t1>0 ? "green" : (t2>0 ? "yellow" : "red");
+  const fmt = (iso)=>{ const d=new Date(iso); return isNaN(d)?"—":
+    d.toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); };
+
+  function renderMeta(){
+    $("updated").textContent = state.updatedAt ? fmt(state.updatedAt) : "waiting for first check…";
+    let stale="";
+    if(state.updatedAt){
+      const hrs=(Date.now()-new Date(state.updatedAt).getTime())/36e5;
+      if(hrs>2) stale=` · <span class="stale">may be stale (${Math.floor(hrs)}h ago)</span>`;
+    }
+    $("note2").innerHTML = (state.live?"":" · showing starting snapshot") + stale;
+  }
+
+  function renderList(){
+    const list=$("list"); list.innerHTML="";
+    for(const it of state.items){
+      const st=statusOf(it.t1,it.t2);
+      const a=document.createElement("a");
+      a.className="row "+st; a.href=STORE+it.slug+"/"; a.target="_blank"; a.rel="noopener";
+      a.innerHTML=`
+        <div class="name">
+          <span class="swatch" style="background:${it.swatch||"#444"}"></span>
+          <span class="t">${it.label}</span>
+          ${WATCHED.has(it.slug)?BELL:""}
+          ${it.error?'<span class="err" title="'+it.error+'">stale</span>':""}
+        </div>
+        <div class="sizes">
+          <div class="size t1 ${it.t1===0?"zero":""}"><div class="lab">Talle 1</div><div class="num">${it.t1}</div></div>
+          <div class="size t2 ${it.t2===0?"zero":""}"><div class="lab">Talle 2</div><div class="num">${it.t2}</div></div>
+        </div>`;
+      list.appendChild(a);
+    }
+    const greens=state.items.filter(x=>statusOf(x.t1,x.t2)==="green").length;
+    $("note").innerHTML=`${greens} of ${state.items.length} items have size 1 in stock. `
+      +`Bell = you'll be emailed when it returns in size 1. Tap a row to open its store page.`;
+  }
+
+  function renderControls(){
+    $("alerts").checked = alertsEnabled;
+    $("ctlnote").textContent = alertsEnabled
+      ? "Alerts on — you'll get one email when a watched item returns in size 1."
+      : "Alerts off — the tracker still refreshes, but no emails are sent.";
+  }
+
+  async function load(){
+    try{
+      const r=await fetch("/.netlify/functions/data",{cache:"no-store"});
+      const d=await r.json();
+      if(d.stock && Array.isArray(d.stock.items) && d.stock.items.length){
+        state={items:d.stock.items,updatedAt:d.stock.updatedAt,live:true};
+      }
+      if(d.settings) alertsEnabled=!!d.settings.alertsEnabled;
+      renderList(); renderMeta(); renderControls();
+    }catch(e){ /* keep whatever we have */ }
+  }
+
+  $("alerts").addEventListener("change", async (e)=>{
+    const v=e.target.checked; alertsEnabled=v; renderControls();
+    try{ await fetch("/.netlify/functions/settings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({alertsEnabled:v})}); }
+    catch(_){ e.target.checked=!v; alertsEnabled=!v; renderControls(); }
+  });
+
+  const btn=$("refresh");
+  btn.addEventListener("click", async ()=>{
+    btn.disabled=true; btn.classList.add("spin");
+    $("ctlnote").innerHTML='<span class="pending">Checking the store now…</span>';
+    try{ await fetch("/.netlify/functions/refresh",{method:"POST"}); await load(); }
+    catch(_){}
+    btn.classList.remove("spin"); btn.disabled=false;
+  });
+
+  // Initial paint + load, then poll so scheduled updates show up.
+  renderList(); renderMeta(); renderControls();
+  $("alerts").disabled=false;
+  load();
+  setInterval(load, 120000);
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) load(); });
+</script>
+</body>
+</html>
