@@ -16,7 +16,7 @@ const SENDER = process.env.ALERT_FROM_NUDIE || "Nudie Tuff Tony <onboarding@rese
 const BASE = "https://www.nudiejeans.com/en-AR/product/";
 
 // Sizes watched for every colorway.
-export const SIZES = ["W28/L32", "W30/L32"];
+export const SIZES = ["W28/L32", "W29/L32", "W30/L32"];
 
 // The colorways to track. Edit to add/remove.
 export const PRODUCTS = [
