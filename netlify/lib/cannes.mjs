@@ -1,16 +1,15 @@
 // Cannes Film Week (Semana de Cine, Cine Gaumont, Buenos Aires) ticket watcher.
 // Checks a few pages every 5 minutes and emails when something ticket-relevant
-// changes. Emails come from "Cannes BA Tickets".
+// changes, showing exactly what changed. Emails come from "Cannes BA Tickets".
 //
 // Two watch modes:
 //  - "text": extract the page's visible text, keep only lines matching `focus`
 //    (ticket keywords / the Cannes film titles), and alert when that subset
-//    changes. Ignores unrelated page churn so you don't get false alarms.
+//    changes. The email shows the new/removed lines (a diff), not just a dump.
 //  - "build": the page is a JavaScript app whose content isn't in the server
-//    HTML (cannesfilmweek.ar reads it from a database in the browser). We can't
-//    read that text server-side, so we watch the site's build fingerprint — the
-//    hashed asset files it loads — and alert if the site is rebuilt/redeployed.
-//    Caveat: a content-only database edit without a rebuild wouldn't be caught.
+//    HTML (cannesfilmweek.ar reads it from a database in the browser). We watch
+//    the site's build fingerprint — the hashed asset files it loads — and alert
+//    if the site is rebuilt. Caveat: a data-only edit without a rebuild is missed.
 
 import { getStore } from "@netlify/blobs";
 import * as cheerio from "cheerio";
@@ -29,14 +28,14 @@ export const TARGETS = [
     label: "OtrosCines — guía 2026",
     url: "https://otroscines.com/post/semana-de-cine-del-festival-de-cannes-2026-en-el-gaumont-toda-la-programacion-y-nuestras-criticas",
     mode: "text",
-    focus: /entrada|entradas|venta|comprar|preventa|anticipad|localidad|precio|\$\s?\d|\b\d{1,2}\s?(de\s)?(noviembre|diciembre)\b|\b\d{1,2}[:.]\d{2}\b/i,
+    // Note: time is colon-only (14:00) so the page's dd.mm date stamp doesn't trigger it.
+    focus: /entrada|entradas|venta|comprar|preventa|anticipad|localidad|precio|\$\s?\d|\b\d{1,2}\s?(de\s)?(noviembre|diciembre)\b|\b\d{1,2}:\d{2}\b/i,
   },
   {
     id: "gaumont",
     label: "Cine Gaumont — cartelera",
     url: "https://www.cinegaumont.ar/es-AR/programacion",
     mode: "text",
-    // The event / its films appearing here IS the on-sale moment.
     focus: /cannes|bola negra|\bfjord\b|ser querido|tigre de papel|hombre de su tiempo|soudain/i,
   },
   {
@@ -66,7 +65,6 @@ function relevantLines(text, focus) {
   return text.split("\n").filter((l) => focus.test(l)).join("\n");
 }
 
-// Hashed asset files the page loads — changes when the site is rebuilt.
 function buildFingerprint(html) {
   const $ = cheerio.load(html);
   const assets = new Set();
@@ -81,38 +79,65 @@ function store() {
   return getStore("cannes");
 }
 
+// Clears the baseline so the next run records a fresh one without emailing.
+export async function resetState() {
+  await store().delete("state");
+}
+
+function diffLines(oldStr, newStr) {
+  const oldL = (oldStr || "").split("\n").filter(Boolean);
+  const newL = (newStr || "").split("\n").filter(Boolean);
+  return {
+    added: newL.filter((l) => !oldL.includes(l)),
+    removed: oldL.filter((l) => !newL.includes(l)),
+  };
+}
+
+function changeSummaryText(c) {
+  if (c.mode === "build") {
+    const a = (c.added || []).map((x) => x.split("/").pop());
+    const r = (c.removed || []).map((x) => x.split("/").pop());
+    let s = "El sitio se reconstruyó (cambiaron archivos del build).";
+    if (a.length) s += "\nNuevos: " + a.join(", ");
+    if (r.length) s += "\nAnteriores: " + r.join(", ");
+    return s;
+  }
+  let s = "";
+  if ((c.added || []).length) s += "NUEVO:\n" + c.added.join("\n");
+  if ((c.removed || []).length) s += (s ? "\n\n" : "") + "YA NO ESTÁ:\n" + c.removed.join("\n");
+  return s || (c.extract || "(sin texto)");
+}
+
 async function sendAlert(changes) {
   const key = process.env.RESEND_API_KEY;
   if (!key) { console.warn("RESEND_API_KEY not set — skipping Cannes email"); return; }
   const to = process.env.ALERT_TO || "mfaigenbaum@gmail.com";
 
   const labels = changes.map((c) => c.label.replace(/\s*—.*$/, "")).join(", ");
-  const subject = "Cannes BA Tickets — posible novedad (" + labels + ")";
+  const subject = "Cannes BA Tickets — cambió: " + labels;
 
   const blocks = changes
     .map((c) => {
-      const shown = c.mode === "build"
-        ? "El sitio cambió (posible actualización a 2026). Abrí el enlace para ver."
-        : (c.extract || "(sin texto)");
+      const summary = changeSummaryText(c);
       return `
       <div style="margin:0 0 16px;padding:12px 0;border-top:1px solid #eee">
-        <div style="font-weight:600;font-size:15px">${c.label}${c.appeared ? ' — <span style="color:#16a34a">apareció contenido nuevo</span>' : ""}</div>
+        <div style="font-weight:600;font-size:15px">${c.label}</div>
         <div style="font-size:12px;margin:3px 0 8px"><a href="${c.url}" style="color:#2563eb">${c.url}</a></div>
-        <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#333;margin:0;background:#f7f7f6;padding:9px 11px;border-radius:6px">${shown.slice(0, 900).replace(/</g, "&lt;")}</pre>
+        <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#333;margin:0;background:#f7f7f6;padding:9px 11px;border-radius:6px">${summary.slice(0, 1200).replace(/</g, "&lt;")}</pre>
       </div>`;
     })
     .join("");
 
   const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:560px;color:#1a1a1a;line-height:1.5">
     <p style="font-size:15px;margin:0 0 6px"><b>Cambió algo en una página que vigilo.</b></p>
-    <p style="font-size:13px;color:#555;margin:0 0 14px">Puede ser el anuncio de venta de entradas. Revisá el enlace para confirmar.</p>
+    <p style="font-size:13px;color:#555;margin:0 0 14px">Abajo, exactamente qué cambió. Puede ser el anuncio de entradas.</p>
     ${blocks}
     <p style="color:#8e8e93;font-size:12px;margin:14px 0 0">Cannes BA Tickets · revisa cada 5 min</p>
   </div>`;
 
   const text =
-    "Cambió algo en una página vigilada (posible venta de entradas):\n\n" +
-    changes.map((c) => `${c.label}\n${c.url}\n${c.mode === "build" ? "El sitio cambió (posible actualización)." : (c.extract || "").slice(0, 900)}`).join("\n\n---\n\n");
+    "Cambió algo en una página vigilada:\n\n" +
+    changes.map((c) => `${c.label}\n${c.url}\n\n${changeSummaryText(c)}`).join("\n\n———\n\n");
 
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -155,7 +180,6 @@ export async function run() {
       const hadBaseline = rec.extractHash !== undefined;
       const hash = sha1(extract);
       const changed = hadBaseline && rec.extractHash !== hash;
-      const appeared = mode !== "build" && (!rec.extract || rec.extract.length === 0) && extract.length > 0;
 
       targets[tgt.id] = {
         label: tgt.label, url: tgt.url, mode, status: r.status, ok: true,
@@ -164,7 +188,10 @@ export async function run() {
         lastChanged: changed ? now : rec.lastChanged || null,
       };
 
-      if (changed && !firstRun) changes.push({ ...tgt, extract, appeared, mode });
+      if (changed && !firstRun) {
+        const { added, removed } = diffLines(rec.extract, extract);
+        changes.push({ ...tgt, extract, added, removed, mode });
+      }
     } catch (e) {
       targets[tgt.id] = { ...rec, label: tgt.label, url: tgt.url, mode, ok: false, error: String(e.message || e), lastChecked: now };
     }
