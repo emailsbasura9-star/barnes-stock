@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watchers — Barnes & Cannes</title>
+<title>Watchers — Jeans, Barnes & Cannes</title>
 <style>
   :root{
     --bg:#0f0f11; --card:#1a1a1d; --ink:#f3f3f2; --muted:#8e8e93; --line:#2a2a2e;
@@ -17,10 +17,9 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
   .wrap{max-width:720px;margin:0 auto;padding:22px 18px 60px}
 
-  /* Tabs */
-  .tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
   .tab{appearance:none;background:none;border:none;color:var(--muted);font:inherit;font-size:14px;font-weight:600;
-    padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.12s}
+    padding:10px 13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.12s}
   .tab:hover{color:var(--ink)}
   .tab.active{color:var(--ink);border-bottom-color:var(--accent)}
   section[hidden]{display:none}
@@ -31,7 +30,6 @@
   .sub b{color:var(--ink);font-weight:600}
   .sub .stale{color:var(--yellow)}
 
-  /* Controls (Barnes) */
   .controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);
     border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin:14px 0 8px}
   .ctl{display:flex;align-items:center;gap:9px;font-size:13.5px}
@@ -78,17 +76,29 @@
   .row.yellow .size.t2 .num{color:var(--yellow)}
   footer{margin-top:24px;font-size:12px;color:var(--muted);line-height:1.6}
 
-  /* Cannes cards */
+  /* Jeans */
+  .jrow{display:flex;gap:13px;align-items:center;background:var(--card);border:1px solid var(--line);
+    border-left-width:4px;border-left-color:var(--line);border-radius:12px;padding:10px 13px;
+    text-decoration:none;color:inherit;margin-bottom:8px;transition:transform .08s ease,box-shadow .08s ease,background .15s ease}
+  .jrow:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
+  .jrow.has{border-left-color:var(--green-line);background:var(--green-bg)}
+  .jthumb{width:50px;height:66px;object-fit:cover;border-radius:7px;flex:0 0 auto;background:#222}
+  .jbody{flex:1;min-width:0}
+  .jname{font-size:15px;font-weight:600;letter-spacing:-.01em}
+  .jchips{display:flex;gap:7px;margin-top:6px;flex-wrap:wrap}
+  .jchip{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.04)}
+  .jchip.on{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
+  .jerr{color:var(--red);font-size:11px;margin-top:5px}
+
   .wcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin-bottom:10px}
-  .wcard .wtop{display:flex;align-items:center;gap:10px}
-  .wcard .wlabel{font-size:15px;font-weight:600;flex:1;min-width:0}
+  .wtop{display:flex;align-items:center;gap:10px}
+  .wlabel{font-size:15px;font-weight:600;flex:1;min-width:0}
   .pill{font-size:11px;font-weight:650;padding:3px 9px;border-radius:999px;white-space:nowrap}
   .pill.changed{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line)}
   .pill.steady{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line)}
   .pill.err{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
   .wmeta{font-size:11.5px;color:var(--muted);margin-top:6px}
-  .wsnip{margin-top:9px;font-size:12.5px;color:#cfcfce;background:#141416;border:1px solid var(--line);
-    border-radius:8px;padding:8px 10px;white-space:pre-wrap;max-height:120px;overflow:auto}
+  .wsnip{margin-top:9px;font-size:12.5px;color:#cfcfce;background:#141416;border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap;max-height:120px;overflow:auto}
   .wlink{font-size:12px;color:var(--accent);text-decoration:none;margin-top:8px;display:inline-block}
 </style>
 </head>
@@ -96,17 +106,27 @@
 <div class="wrap">
 
   <div class="tabs">
-    <button class="tab active" data-tab="barnes">Barnes tees</button>
+    <button class="tab active" data-tab="jeans">Tuff Tony</button>
+    <button class="tab" data-tab="barnes">Barnes tees</button>
     <button class="tab" data-tab="cannes">Cannes tickets</button>
   </div>
 
+  <!-- ===================== JEANS ===================== -->
+  <section id="tab-jeans">
+    <header>
+      <h1>Nudie Tuff Tony — W28/L32 &amp; W30/L32</h1>
+      <div class="sub">Checks hourly · last run: <b id="j-lastrun">—</b></div>
+    </header>
+    <div id="j-list"></div>
+    <footer>Green chip = in stock in that size. You get an email from “Nudie Tuff Tony” when a watched size goes from out to in. Tap a row to open its product page.</footer>
+  </section>
+
   <!-- ===================== BARNES ===================== -->
-  <section id="tab-barnes">
+  <section id="tab-barnes" hidden>
     <header>
       <h1>Barnes Muscle Tees — Stock</h1>
       <div class="sub">Last updated: <b id="updated">—</b> · checks hourly <span id="note2"></span></div>
     </header>
-
     <div class="controls">
       <label class="ctl">
         <span class="switch"><input type="checkbox" id="alerts" disabled><span class="slider"></span></span>
@@ -118,14 +138,12 @@
       </button>
     </div>
     <div class="ctlnote" id="ctlnote"></div>
-
     <div class="legend">
       <span><i class="dot green"></i> Size 1 available</span>
       <span><i class="dot yellow"></i> Only size 2</span>
       <span><i class="dot red"></i> Neither size</span>
       <span><i class="bell"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></i> Alerts on</span>
     </div>
-
     <div class="list" id="list"></div>
     <footer id="note"></footer>
   </section>
@@ -139,31 +157,61 @@
     <div id="c-list"></div>
     <footer id="c-note">
       Watching for the on-sale announcement (Semana de Cine, Dec 7–13 at the Gaumont).
-      You get an email from “Cannes BA Tickets” when the ticket-relevant text changes —
-      a date, time, price or purchase link, or the event appearing in the Gaumont cartelera.
+      Email from “Cannes BA Tickets” when the ticket-relevant text changes.
     </footer>
   </section>
 
 </div>
 
 <script>
+  const $ = (id) => document.getElementById(id);
+  const fmt = (iso) => { const d = new Date(iso); return isNaN(d) ? "—"
+    : d.toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); };
+
   /* ---------------- Tabs ---------------- */
   const tabs = document.querySelectorAll(".tab");
   tabs.forEach((b) => b.addEventListener("click", () => {
     tabs.forEach((x) => x.classList.toggle("active", x === b));
-    document.getElementById("tab-barnes").hidden = b.dataset.tab !== "barnes";
-    document.getElementById("tab-cannes").hidden = b.dataset.tab !== "cannes";
+    $("tab-jeans").hidden  = b.dataset.tab !== "jeans";
+    $("tab-barnes").hidden = b.dataset.tab !== "barnes";
+    $("tab-cannes").hidden = b.dataset.tab !== "cannes";
     if (b.dataset.tab === "cannes") loadCannes();
+    if (b.dataset.tab === "jeans") loadJeans();
   }));
 
-  const fmt = (iso) => { const d = new Date(iso); return isNaN(d) ? "—"
-    : d.toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); };
-  const $ = (id) => document.getElementById(id);
+  /* ---------------- Jeans (Tuff Tony) ---------------- */
+  function renderJeans(data){
+    $("j-lastrun").textContent = data.lastRun ? fmt(data.lastRun) : "waiting for first check…";
+    const list = $("j-list"); list.innerHTML = "";
+    for (const p of data.products){
+      const chips = data.sizes.map((s) => {
+        const on = p.sizes[s] === "in";
+        return `<span class="jchip ${on?"on":""}">${s}: ${on?"in":"out"}</span>`;
+      }).join("");
+      const any = data.sizes.some((s) => p.sizes[s] === "in");
+      const a = document.createElement("a");
+      a.className = "jrow" + (any ? " has" : "");
+      a.href = p.url; a.target = "_blank"; a.rel = "noopener";
+      a.innerHTML = `
+        <img class="jthumb" src="${p.img}" alt="" loading="lazy" referrerpolicy="no-referrer">
+        <div class="jbody">
+          <div class="jname">${p.label}</div>
+          <div class="jchips">${chips}</div>
+          ${p.error ? '<div class="jerr">could not read this one</div>' : ""}
+        </div>`;
+      list.appendChild(a);
+    }
+  }
+  let jeansTimer = null;
+  async function loadJeans(){
+    try { const r = await fetch("/.netlify/functions/nudie-data",{cache:"no-store"}); renderJeans(await r.json()); } catch(e){}
+    if(!jeansTimer) jeansTimer = setInterval(()=>{ if(!$("tab-jeans").hidden) loadJeans(); }, 180000);
+  }
 
   /* ---------------- Barnes ---------------- */
   const STORE = "https://barnesindustries.com.ar/productos/";
   const WATCHED = new Set(["muscle-tee-white-t503w","muscle-tees","muscle-tee-slub-black-hhm2a","muscle-tee-slub-habano-1g2b5","muscle-tee-vison-domingo-20hs-yu8xy"]);
-  const BELL = '<span class="bell" title="You\'ll be emailed when this returns in size 1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>';
+  const BELL = '<span class="bell" title="Back-in-stock alert on this one"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>';
   const FALLBACK = { updatedAt:null, items:[
     {label:"White",swatch:"#ededed",slug:"muscle-tee-white-t503w",t1:0,t2:0},
     {label:"Black",swatch:"#161616",slug:"muscle-tees",t1:0,t2:1},
@@ -178,7 +226,6 @@
   let state = { ...FALLBACK, live:false };
   let alertsEnabled = true;
   const statusOf = (t1,t2)=> t1>0 ? "green" : (t2>0 ? "yellow" : "red");
-
   function renderMeta(){
     $("updated").textContent = state.updatedAt ? fmt(state.updatedAt) : "waiting for first check…";
     let stale="";
@@ -250,8 +297,11 @@
   let cannesTimer=null;
   async function loadCannes(){
     try{ const r=await fetch("/.netlify/functions/cannes-data",{cache:"no-store"}); renderCannes(await r.json()); }catch(e){}
-    if(!cannesTimer) cannesTimer=setInterval(()=>{ if(!document.getElementById("tab-cannes").hidden) loadCannes(); }, 120000);
+    if(!cannesTimer) cannesTimer=setInterval(()=>{ if(!$("tab-cannes").hidden) loadCannes(); }, 120000);
   }
+
+  // Jeans is the default tab — load it on startup.
+  loadJeans();
 </script>
 </body>
 </html>
