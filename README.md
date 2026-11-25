@@ -26,7 +26,7 @@ Storage uses **Netlify Blobs** (built in, nothing to set up). Email uses **Resen
 ## One-time setup
 
 ### 1. Resend (email)
-1. Create a Resend account **using mfaigenbaum@gmail.com** as the account email.
+1. Create a Resend account **using email@gmail.com** as the account email.
    (With no custom domain, Resend's default sender `onboarding@resend.dev` only delivers
    to the account owner's own address — so the account email must be the one you want
    alerts at.)
