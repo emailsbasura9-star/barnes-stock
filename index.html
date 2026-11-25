@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watchers — Jeans, Barnes & Cannes</title>
+<title>Stock Watchers</title>
 <style>
   :root{
     --bg:#0f0f11; --card:#1a1a1d; --ink:#f3f3f2; --muted:#8e8e93; --line:#2a2a2e;
@@ -17,11 +17,12 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
   .wrap{max-width:720px;margin:0 auto;padding:22px 18px 60px}
 
-  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
   .tab{appearance:none;background:none;border:none;color:var(--muted);font:inherit;font-size:14px;font-weight:600;
-    padding:10px 13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.12s}
+    padding:10px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.12s;white-space:nowrap}
   .tab:hover{color:var(--ink)}
   .tab.active{color:var(--ink);border-bottom-color:var(--accent)}
+  .tab.addbtn{color:var(--accent);font-size:17px;font-weight:700;padding:8px 12px}
   section[hidden]{display:none}
 
   header{margin-bottom:16px}
@@ -29,6 +30,15 @@
   .sub{font-size:13px;color:var(--muted)}
   .sub b{color:var(--ink);font-weight:600}
   .sub .stale{color:var(--yellow)}
+
+  .whead{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .whead h1{margin:0}
+  .whead .spacer{flex:1}
+  .smallbtn{appearance:none;background:#26262a;color:var(--ink);border:1px solid var(--line);border-radius:8px;
+    padding:6px 11px;font:inherit;font-size:13px;font-weight:560;cursor:pointer}
+  .smallbtn:hover{background:#303035}
+  .smallbtn.danger{color:var(--red)}
+  .empty{color:var(--muted);font-size:13.5px;padding:16px 2px}
 
   .controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);
     border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin:14px 0 8px}
@@ -76,12 +86,13 @@
   .row.yellow .size.t2 .num{color:var(--yellow)}
   footer{margin-top:24px;font-size:12px;color:var(--muted);line-height:1.6}
 
-  /* Jeans */
-  .jrow{display:flex;gap:13px;align-items:center;background:var(--card);border:1px solid var(--line);
-    border-left-width:4px;border-left-color:var(--line);border-radius:12px;padding:10px 13px;
-    text-decoration:none;color:inherit;margin-bottom:8px;transition:transform .08s ease,box-shadow .08s ease,background .15s ease}
-  .jrow:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
+  /* Watch item rows */
+  .jrow{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);
+    border-left-width:4px;border-left-color:var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;
+    transition:transform .08s ease,box-shadow .08s ease,background .15s ease}
+  .jrow:hover{box-shadow:0 4px 16px rgba(0,0,0,.3)}
   .jrow.has{border-left-color:var(--green-line);background:var(--green-bg)}
+  .jlink{display:flex;gap:13px;align-items:center;flex:1;min-width:0;text-decoration:none;color:inherit}
   .jthumb{width:50px;height:66px;object-fit:cover;border-radius:7px;flex:0 0 auto;background:#222}
   .jbody{flex:1;min-width:0}
   .jname{font-size:15px;font-weight:600;letter-spacing:-.01em}
@@ -89,6 +100,8 @@
   .jchip{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.04)}
   .jchip.on{background:var(--green-bg);color:var(--green);border-color:var(--green-line)}
   .jerr{color:var(--red);font-size:11px;margin-top:5px}
+  .xitem{appearance:none;background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:4px 6px;flex:0 0 auto}
+  .xitem:hover{color:var(--red)}
 
   .wcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin-bottom:10px}
   .wtop{display:flex;align-items:center;gap:10px}
@@ -100,37 +113,30 @@
   .wmeta{font-size:11.5px;color:var(--muted);margin-top:6px}
   .wsnip{margin-top:9px;font-size:12.5px;color:#cfcfce;background:#141416;border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap;max-height:120px;overflow:auto}
   .wlink{font-size:12px;color:var(--accent);text-decoration:none;margin-top:8px;display:inline-block}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:36px 16px;z-index:50}
+  .sheet{background:#161619;border:1px solid var(--line);border-radius:14px;max-width:460px;width:100%;max-height:85vh;overflow:auto;padding:16px 16px 20px}
+  .sheet-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .sheet-head span{font-size:16px;font-weight:650;flex:1}
+  .x{appearance:none;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+  .field{width:100%;background:#0f0f11;border:1px solid var(--line);border-radius:9px;color:var(--ink);font:inherit;font-size:14px;padding:9px 11px;margin-bottom:10px}
+  .vlist{display:flex;flex-direction:column;gap:2px;max-height:280px;overflow:auto;margin:8px 0}
+  .vrow{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13.5px}
+  .vrow:hover{background:rgba(255,255,255,.04)}
+  .vrow .vstatus{margin-left:auto;font-size:11.5px;color:var(--muted)}
+  .vrow .vstatus.in{color:var(--green)}
+  .msg{font-size:13px;color:var(--muted);margin:8px 0}
+  .msg.err{color:var(--red)}
+  .previmg{width:54px;height:70px;object-fit:cover;border-radius:7px;background:#222;float:left;margin:0 11px 6px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="tabs" id="tabbar"></div>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="jeans">Tuff Tony</button>
-    <button class="tab" data-tab="anovair">Anovair bootcut</button>
-    <button class="tab" data-tab="barnes">Barnes tees</button>
-    <button class="tab" data-tab="cannes">Cannes tickets</button>
-  </div>
-
-  <!-- ===================== JEANS ===================== -->
-  <section id="tab-jeans">
-    <header>
-      <h1>Nudie Tuff Tony — W28/L32 &amp; W30/L32</h1>
-      <div class="sub">Checks hourly · last run: <b id="j-lastrun">—</b></div>
-    </header>
-    <div id="j-list"></div>
-    <footer>Green chip = in stock in that size. You get an email from “Nudie Tuff Tony” when a watched size goes from out to in. Tap a row to open its product page.</footer>
-  </section>
-
-  <!-- ===================== ANOVAIR ===================== -->
-  <section id="tab-anovair" hidden>
-    <header>
-      <h1>Anovair Bootcut — sizes 28 &amp; 30</h1>
-      <div class="sub">Checks hourly · last run: <b id="a-lastrun">—</b></div>
-    </header>
-    <div id="a-list"></div>
-    <footer>Green chip = in stock in that size. Email from “Anovair Bootcut” when a watched size returns. Tap a row to open its product page.</footer>
-  </section>
+  <!-- Dynamic watch tab content -->
+  <section id="tab-watch"></section>
 
   <!-- ===================== BARNES ===================== -->
   <section id="tab-barnes" hidden>
@@ -153,7 +159,6 @@
       <span><i class="dot green"></i> Size 1 available</span>
       <span><i class="dot yellow"></i> Only size 2</span>
       <span><i class="dot red"></i> Neither size</span>
-      <span><i class="bell"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></i> Alerts on</span>
     </div>
     <div class="list" id="list"></div>
     <footer id="note"></footer>
@@ -166,184 +171,211 @@
       <div class="sub">Checks every 5 min · last run: <b id="c-lastrun">—</b></div>
     </header>
     <div id="c-list"></div>
-    <footer id="c-note">
-      Watching for the on-sale announcement (Semana de Cine, Dec 7–13 at the Gaumont).
-      Email from “Cannes BA Tickets” when the ticket-relevant text changes.
-    </footer>
+    <footer id="c-note">Email from “Cannes BA Tickets” when the ticket-relevant text changes.</footer>
   </section>
+</div>
 
+<div id="modal" class="modal" hidden>
+  <div class="sheet">
+    <div class="sheet-head"><span id="modal-title"></span><button class="x" id="modal-close">×</button></div>
+    <div id="modal-body"></div>
+  </div>
 </div>
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s==null?"":s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const fmt = (iso) => { const d = new Date(iso); return isNaN(d) ? "—"
     : d.toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}); };
 
-  /* ---------------- Tabs ---------------- */
-  const tabs = document.querySelectorAll(".tab");
-  tabs.forEach((b) => b.addEventListener("click", () => {
-    tabs.forEach((x) => x.classList.toggle("active", x === b));
-    $("tab-jeans").hidden   = b.dataset.tab !== "jeans";
-    $("tab-anovair").hidden = b.dataset.tab !== "anovair";
-    $("tab-barnes").hidden  = b.dataset.tab !== "barnes";
-    $("tab-cannes").hidden  = b.dataset.tab !== "cannes";
-    if (b.dataset.tab === "cannes") loadCannes();
-    if (b.dataset.tab === "jeans") loadJeans();
-    if (b.dataset.tab === "anovair") loadAnovair();
-  }));
+  function openModal(title){ $("modal-title").textContent=title; $("modal").hidden=false; }
+  function closeModal(){ $("modal").hidden=true; $("modal-body").innerHTML=""; }
+  $("modal-close").addEventListener("click", closeModal);
+  $("modal").addEventListener("click", (e)=>{ if(e.target===$("modal")) closeModal(); });
 
-  /* ---------------- Jeans (Tuff Tony) ---------------- */
-  function renderJeans(data){
-    $("j-lastrun").textContent = data.lastRun ? fmt(data.lastRun) : "waiting for first check…";
-    const list = $("j-list"); list.innerHTML = "";
-    for (const p of data.products){
-      const chips = data.sizes.map((s) => {
-        const on = p.sizes[s] === "in";
-        return `<span class="jchip ${on?"on":""}">${s}: ${on?"in":"out"}</span>`;
-      }).join("");
-      const any = data.sizes.some((s) => p.sizes[s] === "in");
-      const a = document.createElement("a");
-      a.className = "jrow" + (any ? " has" : "");
-      a.href = p.url; a.target = "_blank"; a.rel = "noopener";
-      a.innerHTML = `
-        <img class="jthumb" src="${p.img}" alt="" loading="lazy" referrerpolicy="no-referrer">
-        <div class="jbody">
-          <div class="jname">${p.label}</div>
-          <div class="jchips">${chips}</div>
-          ${p.error ? '<div class="jerr">could not read this one</div>' : ""}
-        </div>`;
-      list.appendChild(a);
+  /* ---------------- Watchlist ---------------- */
+  let cfg = { tabs:[], lastRun:null };
+  let active = { kind:"watch", id:null };   // or {kind:"barnes"} / {kind:"cannes"}
+  let watchTimer = null;
+
+  function renderTabbar(){
+    const bar = $("tabbar"); bar.innerHTML="";
+    for(const t of cfg.tabs){
+      const b=document.createElement("button");
+      b.className="tab"+(active.kind==="watch"&&active.id===t.id?" active":"");
+      b.textContent=t.name;
+      b.onclick=()=>setActive({kind:"watch",id:t.id});
+      bar.appendChild(b);
     }
-  }
-  let jeansTimer = null;
-  async function loadJeans(){
-    try { const r = await fetch("/.netlify/functions/nudie-data",{cache:"no-store"}); renderJeans(await r.json()); } catch(e){}
-    if(!jeansTimer) jeansTimer = setInterval(()=>{ if(!$("tab-jeans").hidden) loadJeans(); }, 180000);
+    const barnes=document.createElement("button");
+    barnes.className="tab"+(active.kind==="barnes"?" active":""); barnes.textContent="Barnes tees";
+    barnes.onclick=()=>setActive({kind:"barnes"}); bar.appendChild(barnes);
+    const cannes=document.createElement("button");
+    cannes.className="tab"+(active.kind==="cannes"?" active":""); cannes.textContent="Cannes tickets";
+    cannes.onclick=()=>setActive({kind:"cannes"}); bar.appendChild(cannes);
+    const add=document.createElement("button");
+    add.className="tab addbtn"; add.textContent="+"; add.title="New tab";
+    add.onclick=addTabFlow; bar.appendChild(add);
   }
 
-  /* ---------------- Anovair (bootcut) ---------------- */
-  function renderAnovair(data){
-    $("a-lastrun").textContent = data.lastRun ? fmt(data.lastRun) : "waiting for first check…";
-    const list = $("a-list"); list.innerHTML = "";
-    for (const p of data.products){
-      const chips = data.sizes.map((s) => {
-        const on = p.sizes[s] === "in";
-        return `<span class="jchip ${on?"on":""}">${s}: ${on?"in":"out"}</span>`;
-      }).join("");
-      const any = data.sizes.some((s) => p.sizes[s] === "in");
-      const a = document.createElement("a");
-      a.className = "jrow" + (any ? " has" : "");
-      a.href = p.url; a.target = "_blank"; a.rel = "noopener";
-      a.innerHTML = `
-        <img class="jthumb" src="${p.img}" alt="" loading="lazy" referrerpolicy="no-referrer">
-        <div class="jbody">
-          <div class="jname">${p.label}</div>
-          <div class="jchips">${chips}</div>
-          ${p.error ? '<div class="jerr">could not read this one</div>' : ""}
-        </div>`;
-      list.appendChild(a);
+  function setActive(a){
+    active=a;
+    $("tab-watch").hidden = a.kind!=="watch";
+    $("tab-barnes").hidden = a.kind!=="barnes";
+    $("tab-cannes").hidden = a.kind!=="cannes";
+    renderTabbar();
+    if(a.kind==="watch") renderWatchTab();
+    if(a.kind==="barnes") loadBarnes();
+    if(a.kind==="cannes") loadCannes();
+  }
+
+  function renderWatchTab(){
+    const tab = cfg.tabs.find(t=>t.id===active.id);
+    const root = $("tab-watch");
+    if(!tab){ root.innerHTML = '<div class="empty">No tabs yet. Press + to add one.</div>'; return; }
+    let html = `<div class="whead"><h1>${esc(tab.name)}</h1><div class="spacer"></div>
+      <button class="smallbtn" id="add-product">+ Add product</button>
+      <button class="smallbtn danger" id="del-tab">Delete tab</button></div>
+      <div class="sub" style="margin:-8px 0 14px">Checks hourly · last run: <b>${cfg.lastRun?fmt(cfg.lastRun):"—"}</b></div>
+      <div id="witems"></div>
+      <footer>Green chip = in stock in that size. Email from “Stock Watcher” when a watched size returns. Tap a product to open it.</footer>`;
+    root.innerHTML = html;
+    $("add-product").onclick = ()=>addProductFlow(tab.id);
+    $("del-tab").onclick = async ()=>{
+      if(!confirm('Delete the "'+tab.name+'" tab and everything in it?')) return;
+      await api({type:"removeTab",tabId:tab.id});
+      active={kind:"watch",id:(cfg.tabs.find(t=>t.id!==tab.id)||{}).id||null};
+      await loadWatch();
+    };
+    const box=$("witems");
+    if(!tab.items.length){ box.innerHTML='<div class="empty">Nothing tracked here yet — press “+ Add product”.</div>'; return; }
+    for(const p of tab.items){
+      const chips=Object.keys(p.sizes).map(s=>{const on=p.sizes[s]==="in";return `<span class="jchip ${on?"on":""}">${esc(s)}: ${on?"in":"out"}</span>`;}).join("");
+      const any=Object.values(p.sizes).some(v=>v==="in");
+      const row=document.createElement("div"); row.className="jrow"+(any?" has":"");
+      row.innerHTML=`<a class="jlink" href="${esc(p.url)}" target="_blank" rel="noopener">
+          ${p.img?`<img class="jthumb" src="${esc(p.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:'<div class="jthumb"></div>'}
+          <div class="jbody"><div class="jname">${esc(p.label)}</div><div class="jchips">${chips}</div>${p.error?'<div class="jerr">could not read this link</div>':''}</div>
+        </a><button class="xitem" title="Remove">×</button>`;
+      row.querySelector(".xitem").onclick=async()=>{ await api({type:"removeItem",tabId:tab.id,itemId:p.id}); await loadWatch(); };
+      box.appendChild(row);
     }
   }
-  let anovairTimer = null;
-  async function loadAnovair(){
-    try { const r = await fetch("/.netlify/functions/anovair-data",{cache:"no-store"}); renderAnovair(await r.json()); } catch(e){}
-    if(!anovairTimer) anovairTimer = setInterval(()=>{ if(!$("tab-anovair").hidden) loadAnovair(); }, 180000);
+
+  async function api(action){
+    try{ return await (await fetch("/.netlify/functions/watch-config",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(action)})).json(); }
+    catch(e){ return {ok:false,error:String(e)}; }
+  }
+
+  function addTabFlow(){
+    openModal("New tab");
+    $("modal-body").innerHTML = `<input class="field" id="tabname" placeholder="Tab name (e.g. Flare Glenn, Shoes…)">
+      <button class="smallbtn" id="createtab">Create tab</button>`;
+    $("tabname").focus();
+    $("createtab").onclick = async ()=>{
+      const name=$("tabname").value.trim(); if(!name) return;
+      const r=await api({type:"addTab",name});
+      closeModal(); await loadWatch();
+      if(r&&r.tabId) setActive({kind:"watch",id:r.tabId});
+    };
+  }
+
+  function addProductFlow(tabId){
+    openModal("Add product");
+    $("modal-body").innerHTML = `<input class="field" id="purl" placeholder="Paste a product link…">
+      <button class="smallbtn" id="findbtn">Find sizes</button>
+      <div id="findres"></div>`;
+    $("purl").focus();
+    $("findbtn").onclick = async ()=>{
+      const url=$("purl").value.trim(); if(!url) return;
+      const res=$("findres"); res.innerHTML='<div class="msg">Reading the page…</div>';
+      let data;
+      try{ data=await (await fetch("/.netlify/functions/watch-preview",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({url})})).json(); }
+      catch(e){ res.innerHTML='<div class="msg err">Could not reach that link.</div>'; return; }
+      if(!data.ok){ res.innerHTML='<div class="msg err">'+esc(data.error||"Could not read this link.")+'</div>'; return; }
+      const vs=data.variants||[];
+      res.innerHTML = `${data.image?`<img class="previmg" src="${esc(data.image)}" referrerpolicy="no-referrer">`:''}
+        <div style="font-weight:600;font-size:15px">${esc(data.title||url)}</div>
+        <div class="msg">Tick the sizes to watch (${vs.length} found):</div>
+        <input class="field" id="vfilter" placeholder="filter sizes…">
+        <div class="vlist" id="vlist"></div>
+        <button class="smallbtn" id="trackbtn">Track selected</button>
+        <div class="msg" id="addmsg"></div>`;
+      const vlist=$("vlist");
+      vs.forEach(v=>{ const r=document.createElement("label"); r.className="vrow"; r.dataset.n=(v.name||"").toLowerCase();
+        r.innerHTML=`<input type="checkbox" value="${esc(v.name)}"><span>${esc(v.name)}</span><span class="vstatus ${v.available?"in":""}">${v.available?"in stock":"out"}</span>`;
+        vlist.appendChild(r); });
+      $("vfilter").addEventListener("input",e=>{const q=e.target.value.toLowerCase();vlist.querySelectorAll(".vrow").forEach(r=>{r.style.display=r.dataset.n.includes(q)?"":"none";});});
+      $("trackbtn").onclick = async ()=>{
+        const sizes=[...vlist.querySelectorAll("input:checked")].map(c=>c.value);
+        if(!sizes.length){ $("addmsg").textContent="Pick at least one size."; return; }
+        $("trackbtn").disabled=true;
+        await api({type:"addItem",tabId,url,label:data.title,img:data.image,sizes});
+        closeModal(); await loadWatch();
+      };
+    };
+  }
+
+  async function loadWatch(){
+    try{ cfg = await (await fetch("/.netlify/functions/watch-data",{cache:"no-store"})).json(); }catch(e){ return; }
+    if(active.kind==="watch"){
+      if(!cfg.tabs.find(t=>t.id===active.id)) active.id = (cfg.tabs[0]||{}).id || null;
+    }
+    renderTabbar();
+    if(active.kind==="watch") renderWatchTab();
+    if(!watchTimer) watchTimer=setInterval(()=>{ if(active.kind==="watch") loadWatch(); }, 180000);
   }
 
   /* ---------------- Barnes ---------------- */
-  const STORE = "https://barnesindustries.com.ar/productos/";
-  const WATCHED = new Set(["muscle-tee-white-t503w","muscle-tees","muscle-tee-slub-black-hhm2a","muscle-tee-slub-habano-1g2b5","muscle-tee-vison-domingo-20hs-yu8xy"]);
-  const BELL = '<span class="bell" title="Back-in-stock alert on this one"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>';
-  const FALLBACK = { updatedAt:null, items:[
-    {label:"White",swatch:"#ededed",slug:"muscle-tee-white-t503w",t1:0,t2:0},
-    {label:"Black",swatch:"#161616",slug:"muscle-tees",t1:0,t2:1},
-    {label:"Slub Black",swatch:"#161616",slug:"muscle-tee-slub-black-hhm2a",t1:0,t2:0},
-    {label:"Slub Habano",swatch:"#b08457",slug:"muscle-tee-slub-habano-1g2b5",t1:0,t2:0},
-    {label:"Brown",swatch:"#5c3d2e",slug:"muscle-tee-vison-domingo-20hs-yu8xy",t1:0,t2:0},
-    {label:"Navy Blue",swatch:"#1b2a4a",slug:"muscle-tee-navy-blue-domingo-20hs-t323a",t1:9,t2:0},
-    {label:"Bordeaux",swatch:"#7b2233",slug:"muscle-tee-heavyweight-bordeaux-miercoles-20hs-17o91",t1:5,t2:4},
-    {label:"Military Green",swatch:"#545e2e",slug:"muscle-tee-military-green-domingo-20hs-1thmk",t1:2,t2:1},
-    {label:"Silver Grey",swatch:"#b7bbc0",slug:"muscle-tee-ash-grey-domingo-20hs-18jel",t1:6,t2:1},
-  ]};
-  let state = { ...FALLBACK, live:false };
-  let alertsEnabled = true;
-  const statusOf = (t1,t2)=> t1>0 ? "green" : (t2>0 ? "yellow" : "red");
-  function renderMeta(){
-    $("updated").textContent = state.updatedAt ? fmt(state.updatedAt) : "waiting for first check…";
-    let stale="";
-    if(state.updatedAt){ const h=(Date.now()-new Date(state.updatedAt).getTime())/36e5; if(h>2) stale=` · <span class="stale">may be stale (${Math.floor(h)}h ago)</span>`; }
-    $("note2").innerHTML = (state.live?"":" · showing starting snapshot") + stale;
-  }
-  function renderList(){
-    const list=$("list"); list.innerHTML="";
-    for(const it of state.items){
-      const st=statusOf(it.t1,it.t2);
-      const a=document.createElement("a");
-      a.className="row "+st; a.href=STORE+it.slug+"/"; a.target="_blank"; a.rel="noopener";
-      a.innerHTML=`<div class="name"><span class="swatch" style="background:${it.swatch||"#444"}"></span><span class="t">${it.label}</span>${WATCHED.has(it.slug)?BELL:""}</div>
-        <div class="sizes">
-          <div class="size t1 ${it.t1===0?"zero":""}"><div class="lab">Talle 1</div><div class="num">${it.t1}</div></div>
-          <div class="size t2 ${it.t2===0?"zero":""}"><div class="lab">Talle 2</div><div class="num">${it.t2}</div></div>
-        </div>`;
-      list.appendChild(a);
-    }
-    const greens=state.items.filter(x=>statusOf(x.t1,x.t2)==="green").length;
-    $("note").innerHTML=`${greens} of ${state.items.length} items have size 1 in stock. Bell = you'll be emailed when it returns in size 1. Tap a row to open its store page.`;
-  }
-  function renderControls(){
-    $("alerts").checked = alertsEnabled;
-    $("ctlnote").textContent = alertsEnabled
-      ? "Alerts on — you'll get one email when a watched item returns in size 1."
-      : "Alerts off — the tracker still refreshes, but no emails are sent.";
-  }
-  async function loadBarnes(){
-    try{
-      const r=await fetch("/.netlify/functions/data",{cache:"no-store"}); const d=await r.json();
-      if(d.stock && Array.isArray(d.stock.items) && d.stock.items.length) state={items:d.stock.items,updatedAt:d.stock.updatedAt,live:true};
-      if(d.settings) alertsEnabled=!!d.settings.alertsEnabled;
-      renderList(); renderMeta(); renderControls();
-    }catch(e){}
-  }
-  $("alerts").addEventListener("change", async (e)=>{
-    const v=e.target.checked; alertsEnabled=v; renderControls();
-    try{ await fetch("/.netlify/functions/settings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({alertsEnabled:v})}); }
-    catch(_){ e.target.checked=!v; alertsEnabled=!v; renderControls(); }
-  });
+  const STORE="https://barnesindustries.com.ar/productos/";
+  let bstate={items:[],updatedAt:null,live:false};
+  const statusOf=(t1,t2)=> t1>0?"green":(t2>0?"yellow":"red");
+  let balerts=true;
+  function bMeta(){ $("updated").textContent=bstate.updatedAt?fmt(bstate.updatedAt):"waiting…";
+    let stale=""; if(bstate.updatedAt){const h=(Date.now()-new Date(bstate.updatedAt).getTime())/36e5; if(h>2) stale=` · <span class="stale">may be stale (${Math.floor(h)}h ago)</span>`;}
+    $("note2").innerHTML=stale; }
+  function bList(){ const l=$("list"); l.innerHTML="";
+    for(const it of bstate.items){ const st=statusOf(it.t1,it.t2); const a=document.createElement("a"); a.className="row "+st; a.href=STORE+it.slug+"/"; a.target="_blank"; a.rel="noopener";
+      a.innerHTML=`<div class="name"><span class="swatch" style="background:${it.swatch||"#444"}"></span><span class="t">${esc(it.label)}</span></div>
+        <div class="sizes"><div class="size t1 ${it.t1===0?"zero":""}"><div class="lab">Talle 1</div><div class="num">${it.t1}</div></div>
+        <div class="size t2 ${it.t2===0?"zero":""}"><div class="lab">Talle 2</div><div class="num">${it.t2}</div></div></div>`;
+      l.appendChild(a); }
+    const g=bstate.items.filter(x=>statusOf(x.t1,x.t2)==="green").length;
+    $("note").innerHTML=`${g} of ${bstate.items.length} items have size 1 in stock. Tap a row to open its store page.`; }
+  function bControls(){ $("alerts").checked=balerts; $("ctlnote").textContent=balerts?"Alerts on — one email when a watched item returns in size 1.":"Alerts off — still refreshes, no emails."; }
+  async function loadBarnes(){ try{ const d=await (await fetch("/.netlify/functions/data",{cache:"no-store"})).json();
+      if(d.stock&&Array.isArray(d.stock.items)&&d.stock.items.length) bstate={items:d.stock.items,updatedAt:d.stock.updatedAt,live:true};
+      if(d.settings) balerts=!!d.settings.alertsEnabled; bList(); bMeta(); bControls(); }catch(e){} }
+  $("alerts").addEventListener("change", async e=>{ const v=e.target.checked; balerts=v; bControls();
+    try{ await fetch("/.netlify/functions/settings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({alertsEnabled:v})}); }catch(_){ e.target.checked=!v; balerts=!v; bControls(); } });
+  $("alerts").disabled=false;
   const bbtn=$("refresh");
-  bbtn.addEventListener("click", async ()=>{
-    bbtn.disabled=true; bbtn.classList.add("spin"); $("ctlnote").innerHTML='<span class="pending">Checking the store now…</span>';
+  bbtn.addEventListener("click", async ()=>{ bbtn.disabled=true; bbtn.classList.add("spin"); $("ctlnote").innerHTML='<span class="pending">Checking the store now…</span>';
     try{ await fetch("/.netlify/functions/refresh",{method:"POST"}); await loadBarnes(); }catch(_){}
-    bbtn.classList.remove("spin"); bbtn.disabled=false;
-  });
-  renderList(); renderMeta(); renderControls(); $("alerts").disabled=false;
-  loadBarnes(); setInterval(loadBarnes,120000);
+    bbtn.classList.remove("spin"); bbtn.disabled=false; });
+  setInterval(()=>{ if(active.kind==="barnes") loadBarnes(); }, 120000);
 
   /* ---------------- Cannes ---------------- */
-  function renderCannes(data){
-    $("c-lastrun").textContent = data.lastRun ? fmt(data.lastRun) : "waiting…";
-    const list=$("c-list"); list.innerHTML="";
-    for(const t of data.targets){
-      const recent = t.lastChanged && (Date.now()-new Date(t.lastChanged).getTime() < 72*36e5);
-      let pill = '<span class="pill steady">no change</span>';
-      if(!t.ok) pill = '<span class="pill err">no connection</span>';
-      else if(recent) pill = '<span class="pill changed">changed '+fmt(t.lastChanged)+'</span>';
-      const card=document.createElement("div"); card.className="wcard";
-      card.innerHTML = `
-        <div class="wtop"><div class="wlabel">${t.label}</div>${pill}</div>
-        <div class="wmeta">Last checked: ${t.lastChecked?fmt(t.lastChecked):"—"}${t.error?' · '+t.error:''}</div>
-        ${t.snippet ? `<div class="wsnip">${t.snippet.replace(/</g,"&lt;")}</div>` : `<div class="wmeta" style="margin-top:8px">No ticket-relevant text matched yet.</div>`}
-        <a class="wlink" href="${t.url}" target="_blank" rel="noopener">Open page ↗</a>`;
-      list.appendChild(card);
-    }
-  }
+  function renderCannes(data){ $("c-lastrun").textContent=data.lastRun?fmt(data.lastRun):"waiting…";
+    const l=$("c-list"); l.innerHTML="";
+    for(const t of data.targets){ const recent=t.lastChanged&&(Date.now()-new Date(t.lastChanged).getTime()<72*36e5);
+      let pill='<span class="pill steady">no change</span>'; if(!t.ok) pill='<span class="pill err">no connection</span>'; else if(recent) pill='<span class="pill changed">changed '+fmt(t.lastChanged)+'</span>';
+      const c=document.createElement("div"); c.className="wcard";
+      c.innerHTML=`<div class="wtop"><div class="wlabel">${esc(t.label)}</div>${pill}</div>
+        <div class="wmeta">Last checked: ${t.lastChecked?fmt(t.lastChecked):"—"}${t.error?" · "+esc(t.error):""}</div>
+        ${t.snippet?`<div class="wsnip">${esc(t.snippet)}</div>`:'<div class="wmeta" style="margin-top:8px">No ticket-relevant text matched yet.</div>'}
+        <a class="wlink" href="${esc(t.url)}" target="_blank" rel="noopener">Open page ↗</a>`;
+      l.appendChild(c); } }
   let cannesTimer=null;
-  async function loadCannes(){
-    try{ const r=await fetch("/.netlify/functions/cannes-data",{cache:"no-store"}); renderCannes(await r.json()); }catch(e){}
-    if(!cannesTimer) cannesTimer=setInterval(()=>{ if(!$("tab-cannes").hidden) loadCannes(); }, 120000);
-  }
+  async function loadCannes(){ try{ renderCannes(await (await fetch("/.netlify/functions/cannes-data",{cache:"no-store"})).json()); }catch(e){}
+    if(!cannesTimer) cannesTimer=setInterval(()=>{ if(active.kind==="cannes") loadCannes(); }, 120000); }
 
-  // Jeans is the default tab — load it on startup.
-  loadJeans();
+  // startup
+  (async ()=>{ cfg = await (await fetch("/.netlify/functions/watch-data",{cache:"no-store"}).catch(()=>({json:()=>({tabs:[]})}))).json();
+    active = { kind:"watch", id:(cfg.tabs[0]||{}).id||null };
+    setActive(active);
+    if(!watchTimer) watchTimer=setInterval(()=>{ if(active.kind==="watch") loadWatch(); }, 180000);
+  })();
 </script>
 </body>
 </html>
