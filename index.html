@@ -107,6 +107,7 @@
 
   <div class="tabs">
     <button class="tab active" data-tab="jeans">Tuff Tony</button>
+    <button class="tab" data-tab="anovair">Anovair bootcut</button>
     <button class="tab" data-tab="barnes">Barnes tees</button>
     <button class="tab" data-tab="cannes">Cannes tickets</button>
   </div>
@@ -119,6 +120,16 @@
     </header>
     <div id="j-list"></div>
     <footer>Green chip = in stock in that size. You get an email from “Nudie Tuff Tony” when a watched size goes from out to in. Tap a row to open its product page.</footer>
+  </section>
+
+  <!-- ===================== ANOVAIR ===================== -->
+  <section id="tab-anovair" hidden>
+    <header>
+      <h1>Anovair Bootcut — sizes 28 &amp; 30</h1>
+      <div class="sub">Checks hourly · last run: <b id="a-lastrun">—</b></div>
+    </header>
+    <div id="a-list"></div>
+    <footer>Green chip = in stock in that size. Email from “Anovair Bootcut” when a watched size returns. Tap a row to open its product page.</footer>
   </section>
 
   <!-- ===================== BARNES ===================== -->
@@ -172,11 +183,13 @@
   const tabs = document.querySelectorAll(".tab");
   tabs.forEach((b) => b.addEventListener("click", () => {
     tabs.forEach((x) => x.classList.toggle("active", x === b));
-    $("tab-jeans").hidden  = b.dataset.tab !== "jeans";
-    $("tab-barnes").hidden = b.dataset.tab !== "barnes";
-    $("tab-cannes").hidden = b.dataset.tab !== "cannes";
+    $("tab-jeans").hidden   = b.dataset.tab !== "jeans";
+    $("tab-anovair").hidden = b.dataset.tab !== "anovair";
+    $("tab-barnes").hidden  = b.dataset.tab !== "barnes";
+    $("tab-cannes").hidden  = b.dataset.tab !== "cannes";
     if (b.dataset.tab === "cannes") loadCannes();
     if (b.dataset.tab === "jeans") loadJeans();
+    if (b.dataset.tab === "anovair") loadAnovair();
   }));
 
   /* ---------------- Jeans (Tuff Tony) ---------------- */
@@ -206,6 +219,35 @@
   async function loadJeans(){
     try { const r = await fetch("/.netlify/functions/nudie-data",{cache:"no-store"}); renderJeans(await r.json()); } catch(e){}
     if(!jeansTimer) jeansTimer = setInterval(()=>{ if(!$("tab-jeans").hidden) loadJeans(); }, 180000);
+  }
+
+  /* ---------------- Anovair (bootcut) ---------------- */
+  function renderAnovair(data){
+    $("a-lastrun").textContent = data.lastRun ? fmt(data.lastRun) : "waiting for first check…";
+    const list = $("a-list"); list.innerHTML = "";
+    for (const p of data.products){
+      const chips = data.sizes.map((s) => {
+        const on = p.sizes[s] === "in";
+        return `<span class="jchip ${on?"on":""}">${s}: ${on?"in":"out"}</span>`;
+      }).join("");
+      const any = data.sizes.some((s) => p.sizes[s] === "in");
+      const a = document.createElement("a");
+      a.className = "jrow" + (any ? " has" : "");
+      a.href = p.url; a.target = "_blank"; a.rel = "noopener";
+      a.innerHTML = `
+        <img class="jthumb" src="${p.img}" alt="" loading="lazy" referrerpolicy="no-referrer">
+        <div class="jbody">
+          <div class="jname">${p.label}</div>
+          <div class="jchips">${chips}</div>
+          ${p.error ? '<div class="jerr">could not read this one</div>' : ""}
+        </div>`;
+      list.appendChild(a);
+    }
+  }
+  let anovairTimer = null;
+  async function loadAnovair(){
+    try { const r = await fetch("/.netlify/functions/anovair-data",{cache:"no-store"}); renderAnovair(await r.json()); } catch(e){}
+    if(!anovairTimer) anovairTimer = setInterval(()=>{ if(!$("tab-anovair").hidden) loadAnovair(); }, 180000);
   }
 
   /* ---------------- Barnes ---------------- */
